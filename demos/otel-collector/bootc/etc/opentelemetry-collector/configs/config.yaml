@@ -28,6 +28,7 @@ receivers:
   journald:
     units:
       - flightctl-agent.service
+      - microshift.service
     priority: info
       
 exporters:
