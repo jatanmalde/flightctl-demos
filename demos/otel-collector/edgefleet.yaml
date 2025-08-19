@@ -1,0 +1,87 @@
+apiVersion: flightctl.io/v1alpha1
+kind: Fleet
+metadata:
+  annotations:
+    fleet-controller/batchNumber: "0"
+    fleet-controller/deployingTemplateVersion: 20250819-135936-999999999
+    fleet-controller/deviceSelectionConfigDigest: 419948edcd7846601dab5657b32b96e6
+    fleet-controller/rolloutApprovalMethod: automatic
+    fleet-controller/rolloutApproved: "true"
+    fleet-controller/templateVersion: 20250819-135936-999999999
+  creationTimestamp: "2025-08-19T12:10:03.991865Z"
+  generation: 6
+  labels: {}
+  name: edgefleet
+  resourceVersion: "93"
+spec:
+  rolloutPolicy:
+    defaultUpdateTimeout: 10m
+    deviceSelection:
+      sequence:
+      - limit: 2
+        selector:
+          matchLabels:
+            device: vm
+        successThreshold: 80%
+      strategy: BatchSequence
+  selector:
+    matchLabels:
+      device: vm
+  template:
+    metadata:
+      labels:
+        fleet: edgefleet
+    spec:
+      config:
+      - inline:
+        - content: This system is managed by flightctl. Maintained by Jatan Malde
+          mode: 420
+          path: /etc/motd
+        name: motd-update
+      - gitRef:
+          mountPath: /
+          path: /demos/basic-nginx-demo/configuration
+          repository: basic-nginx-demo1
+          targetRevision: main
+        name: microshift-manifests
+      - gitRef:
+          mountPath: /etc/opentelemetry-collector/config
+          path: /demos/otel-collector/bootc/etc/opentelemetry-collector/config
+          repository: opentelemetry
+          targetRevision: otel-collector
+        name: opentelemetry-config
+      - gitRef:
+          mountPath: /etc/systemd/system/
+          path: /demos/otel-collector/bootc/opentelemetry-collector.service
+          repository: opentelemetry
+          targetRevision: otel-collector
+        name: opentelemetry-service
+      - gitRef:
+          mountPath: /etc/opentelemetry-collector/certs
+          path: /demos/otel-collector/bootc/etc/opentelemetry-collector/certs
+          repository: opentelemetry
+          targetRevision: otel-collector
+        name: opentelemetry-cert
+      os:
+        image: quay.io/jmalde/microshift/microshift-4.19-bootc:v1
+      resources:
+      - alertRules:
+        - description: CPU load is above 50% for more than 10 minutes
+          duration: 10m
+          percentage: 5
+          severity: Warning
+        monitorType: CPU
+        samplingInterval: 30s
+      - alertRules:
+        - description: Memory load is above 50% for more than 10 minutes
+          duration: 10m
+          percentage: 15
+          severity: Critical
+        monitorType: Memory
+        samplingInterval: 5s
+      systemd:
+        matchPatterns:
+        - flightctl-agent.service
+        - crio.service
+        - microshift.service
+        - chronyd.servcice
