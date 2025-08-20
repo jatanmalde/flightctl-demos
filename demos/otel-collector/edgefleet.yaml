@@ -2,7 +2,6 @@ apiVersion: flightctl.io/v1alpha1
 kind: Fleet
 metadata:
   annotations:
-    fleet-controller/batchNumber: "0"
     fleet-controller/deployingTemplateVersion: 20250819-135936-999999999
     fleet-controller/deviceSelectionConfigDigest: 419948edcd7846601dab5657b32b96e6
     fleet-controller/rolloutApprovalMethod: automatic
